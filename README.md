@@ -1,4 +1,4 @@
-# Project RedHorse
+# AI Test Case Generator POC
 
 # Table of Contents
 1. [What the?](#what-the)
