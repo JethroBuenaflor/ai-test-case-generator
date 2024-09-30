@@ -3,11 +3,7 @@
 # Table of Contents
 1. [What the?](#what-the)
 1. [Quickstart](#quickstart)
-1. [Documentation](#documentation)
-1. [Pre-Commit](#pre-commit)
-1. [Testing](#testing)
-1. [Linting](#linting)
-1. [File Formatter](#file-formatter)
+1. [Example Generated Test Cases](#xample-generated-test-cases)
 
 ## What the?
 This is a POC for QA Test Case generator using OpenAI.
