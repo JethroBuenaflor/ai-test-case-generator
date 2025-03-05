@@ -4,18 +4,16 @@ from openai import OpenAI
 from pprint import pprint
 
 AI_MODEL = "gpt-4o"
-ROLE = "You are a Software Quality Assurance Engineer, skilled in finding bugs in mobile and web applications and able to formulate several test cases in minimal scenarios"
-IMAGES_PATH = ".\images"
+# ROLE = "You are a Software Quality Assurance Engineer, skilled in finding bugs in mobile and web applications and able to formulate several test cases in minimal scenarios"
+IMAGES_PATH = "./images"
+ROLE = "You are a data encoder, skilled in scanning an image and wirtes data that is seen in the image."
 
 
-def generate_test_cases(prompt):
+def scan_images(prompt):
     client = OpenAI()
 
-    print ("Creating Test Cases")
-    completion = client.chat.completions.create(
-        model=AI_MODEL,
-        messages=prompt
-    )
+    print("Scanning signature images...")
+    completion = client.chat.completions.create(model=AI_MODEL, messages=prompt)
 
     response = completion.choices[0].message.content
 
@@ -23,13 +21,13 @@ def generate_test_cases(prompt):
 
 
 def save_response(response):
-    f = open("test-cases.txt", "a")
+    f = open("timestamps.csv", "a")
     f.write(response)
     f.close()
 
-    f = open("test-cases.txt", "r")
+    f = open("timestamps.csv", "r")
 
-    print ("Test Cases Created!")
+    print("Signature Timestamp Created!")
 
 
 def generate_role(role_description):
@@ -42,10 +40,7 @@ def generate_role(role_description):
         "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."
     }
     """
-    return {
-        "role": "system",
-        "content": role_description
-    }
+    return {"role": "system", "content": role_description}
 
 
 def generate_asks(asks):
@@ -55,10 +50,7 @@ def generate_asks(asks):
     askings = []
 
     for ask in asks:
-        askings.append({
-            "type": "text",
-            "text": ask
-        })
+        askings.append({"type": "text", "text": ask})
 
     return askings
 
@@ -66,10 +58,7 @@ def generate_asks(asks):
 def generate_user_content(askings, image_contents):
     content = askings + image_contents
 
-    user_content = {
-        "role": "user",
-        "content": content
-    }
+    user_content = {"role": "user", "content": content}
 
     return user_content
 
@@ -81,14 +70,21 @@ def generate_prompt(role_description, asks, image_paths):
     role = generate_role(role_description)
     askings = generate_asks(asks)
 
-    for image_path in image_paths:
+    for index, image_path in enumerate(image_paths):
+        print(image_path.split("/")[-1])
         base64_image = encode_image(image_path)
-        image_contents.append({
-            "type": "image_url",
-            "image_url": {
-                "url": f"data:image/jpeg;base64,{base64_image}"
+        image_contents.append(
+            {
+                "type": "image_url",
+                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
             }
-        })
+        )
+        askings.append(
+            {
+                "type": "text",
+                "text": f"Image {index + 1} filename: " + image_path.split("/")[-1],
+            }
+        )
 
     user_content = generate_user_content(askings, image_contents)
 
@@ -108,7 +104,7 @@ def get_image_paths(directory):
 
     for file in os.listdir(directory):
         filename = os.fsdecode(file)
-        if filename.endswith(".jpg"): 
+        if filename.endswith(".jpg"):
             image_paths.append(os.path.join(directory, filename))
             continue
         else:
@@ -120,14 +116,14 @@ def get_image_paths(directory):
 def main():
     role_description = ROLE
     asks = [
-        "List atleast 20 test cases with steps to reproduce based on the provided images",
-        "Group the test cases per uploaded image"
+        "Write the timestamp that is seen in the lower left part of the image that is in grey background",
+        "Write the data in csv format with filename of the image, and timestamp data",
     ]
     image_directory = IMAGES_PATH
 
     image_paths = get_image_paths(image_directory)
     prompt = generate_prompt(role_description, asks, image_paths)
-    generate_test_cases(prompt)
+    scan_images(prompt)
 
 
 if __name__ == "__main__":
