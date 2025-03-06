@@ -1,5 +1,6 @@
 import os
 import base64
+import time
 from openai import OpenAI
 from pprint import pprint
 
@@ -122,8 +123,15 @@ def main():
     image_directory = IMAGES_PATH
 
     image_paths = get_image_paths(image_directory)
-    prompt = generate_prompt(role_description, asks, image_paths)
-    scan_images(prompt)
+    batch_size = 100
+
+    for i in range(0, len(image_paths), batch_size):
+        batch = image_paths[i:i + batch_size]
+        prompt = generate_prompt(role_description, asks, batch)
+        scan_images(prompt)
+        if i + batch_size < len(image_paths):
+            print("Sleeping for 1 minute before processing the next batch...")
+            time.sleep(60)
 
 
 if __name__ == "__main__":
